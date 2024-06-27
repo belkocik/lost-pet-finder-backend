@@ -1,12 +1,10 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { DrizzleModule } from './drizzle/drizzle.module';
-import { DrizzleService } from './drizzle/drizzle.service';
 import { MyConfigService } from './config/config.service';
 import { ConfigModule } from '@nestjs/config';
 import { validate } from './config';
 import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -16,8 +14,9 @@ import { AuthModule } from './auth/auth.module';
       validate: validate,
     }),
     AuthModule,
+    UsersModule,
   ],
-  controllers: [AppController],
-  providers: [AppService, MyConfigService, DrizzleService],
+  controllers: [],
+  providers: [MyConfigService],
 })
 export class AppModule {}
