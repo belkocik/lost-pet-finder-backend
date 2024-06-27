@@ -15,6 +15,13 @@
       "when": 1719515856695,
       "tag": "0001_mysterious_sabra",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1719519029760,
+      "tag": "0002_military_cerise",
+      "breakpoints": true
     }
   ]
 }
