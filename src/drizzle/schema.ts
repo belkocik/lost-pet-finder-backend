@@ -4,7 +4,7 @@ export const users = pgTable('users', {
   id: serial('id').primaryKey(),
   name: text('name'),
   lastName: text('lastName'),
-  email: text('email'),
+  email: text('email').unique(),
   password: text('password'),
   fullName: text('fullName'),
   hashedRefreshToken: text('hashedRefreshToken'),
