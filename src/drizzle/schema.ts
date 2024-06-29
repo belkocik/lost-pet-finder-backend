@@ -7,4 +7,5 @@ export const users = pgTable('users', {
   email: text('email'),
   password: text('password'),
   fullName: text('fullName'),
+  hashedRefreshToken: text('hashedRefreshToken'),
 });
