@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
 } from '@nestjs/common';
 import { AuthDto } from './dto';
@@ -20,6 +21,51 @@ export class AuthService {
     private readonly i18n: I18nService,
   ) {}
 
+  async signupLocal(dto: AuthDto): Promise<Tokens> {
+    try {
+      const hashedPassword = await this.hashData(dto.password);
+      const [newUser] = await this.drizzleService
+        .insert(users)
+        .values({
+          email: dto.email,
+          password: hashedPassword,
+        })
+        .returning();
+
+      const tokens = await this.getTokens(newUser.id, newUser.email);
+      await this.updateRtHash(newUser.id, tokens.refreshToken);
+
+      return tokens;
+    } catch (error) {
+      console.log('🚀 ~ AuthService ~ signupLocal ~ error:', error);
+      if (error.code === '23505') {
+        throw new ConflictException(this.i18n.t('auth.emailAlreadyExists'));
+      }
+      throw new BadRequestException(
+        this.i18n.t('auth.errorDuringCreatingUser'),
+      );
+    }
+  }
+
+  async signinLocal(dto: AuthDto): Promise<Tokens> {
+    const user = await this.drizzleService.query.users.findFirst({
+      where: eq(users.email, dto.email),
+    });
+    if (!user) throw new ForbiddenException(this.i18n.t('auth.accessDenied'));
+
+    const passwordMatches = await bcrypt.compare(dto.password, user.password);
+    if (!passwordMatches)
+      throw new ForbiddenException(this.i18n.t('auth.accessDenied'));
+
+    const tokens = await this.getTokens(user.id, user.email);
+    await this.updateRtHash(user.id, tokens.refreshToken);
+
+    return tokens;
+  }
+  logout() {}
+  refreshTokens() {}
+
+  //? Utility functions
   hashData(data: string) {
     return bcrypt.hash(data, 10);
   }
@@ -54,30 +100,6 @@ export class AuthService {
     };
   }
 
-  async signupLocal(dto: AuthDto): Promise<Tokens> {
-    try {
-      const hashedPassword = await this.hashData(dto.password);
-      const [newUser] = await this.drizzleService
-        .insert(users)
-        .values({
-          email: dto.email,
-          password: hashedPassword,
-        })
-        .returning();
-
-      const tokens = await this.getTokens(newUser.id, newUser.email);
-
-      return tokens;
-    } catch (error) {
-      console.log('🚀 ~ AuthService ~ signupLocal ~ error:', error);
-      if (error.code === '23505') {
-        throw new ConflictException(this.i18n.t('auth.emailAlreadyExists'));
-      }
-      throw new BadRequestException(
-        this.i18n.t('auth.errorDuringCreatingUser'),
-      );
-    }
-  }
   async updateRtHash(userId: number, rt: string) {
     const hash = await this.hashData(rt);
     await this.drizzleService
@@ -85,7 +107,4 @@ export class AuthService {
       .set({ hashedRefreshToken: hash })
       .where(eq(users.id, userId));
   }
-  signinLocal() {}
-  logout() {}
-  refreshTokens() {}
 }
