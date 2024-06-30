@@ -54,18 +54,6 @@ export class AuthService {
 
   async signupLocal(dto: AuthDto): Promise<Tokens> {
     try {
-      const duplicateUser = await this.drizzleService.query.users.findFirst({
-        where: eq(users.email, dto.email),
-      });
-      console.log(
-        '🚀 ~ AuthService ~ signupLocal ~ duplicateUser:',
-        duplicateUser,
-      );
-
-      if (duplicateUser) {
-        throw new ConflictException('This user already exists');
-      }
-
       const hashedPassword = await this.hashData(dto.password);
       const [newUser] = await this.drizzleService
         .insert(users)
@@ -80,6 +68,9 @@ export class AuthService {
       return tokens;
     } catch (error) {
       console.log('🚀 ~ AuthService ~ signupLocal ~ error:', error);
+      if (error.code === '23505') {
+        throw new ConflictException('This user already exists');
+      }
       throw new BadRequestException(
         'Error while creating a user. Try different email or password',
       );
