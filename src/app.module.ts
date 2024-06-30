@@ -5,6 +5,13 @@ import { ConfigModule } from '@nestjs/config';
 import { validate } from './config';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import {
+  AcceptLanguageResolver,
+  HeaderResolver,
+  I18nModule,
+  QueryResolver,
+} from 'nestjs-i18n';
+import * as path from 'path';
 
 @Module({
   imports: [
@@ -15,6 +22,18 @@ import { UsersModule } from './users/users.module';
     }),
     AuthModule,
     UsersModule,
+    I18nModule.forRoot({
+      fallbackLanguage: 'en',
+      loaderOptions: {
+        path: path.join(__dirname, '/i18n/'),
+        watch: true,
+      },
+      resolvers: [
+        { use: QueryResolver, options: ['lang'] },
+        AcceptLanguageResolver,
+        new HeaderResolver(['x-lang']),
+      ],
+    }),
   ],
   controllers: [],
   providers: [MyConfigService],

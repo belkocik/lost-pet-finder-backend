@@ -10,12 +10,14 @@ import * as bcrypt from 'bcrypt';
 import { eq } from 'drizzle-orm';
 import { Tokens } from './types';
 import { JwtService } from '@nestjs/jwt';
+import { I18nService } from 'nestjs-i18n';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
     private readonly drizzleService: DrizzleService,
+    private readonly i18n: I18nService,
   ) {}
 
   hashData(data: string) {
@@ -69,10 +71,10 @@ export class AuthService {
     } catch (error) {
       console.log('🚀 ~ AuthService ~ signupLocal ~ error:', error);
       if (error.code === '23505') {
-        throw new ConflictException('This user already exists');
+        throw new ConflictException(this.i18n.t('auth.emailAlreadyExists'));
       }
       throw new BadRequestException(
-        'Error while creating a user. Try different email or password',
+        this.i18n.t('auth.errorDuringCreatingUser'),
       );
     }
   }
