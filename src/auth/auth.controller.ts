@@ -9,9 +9,8 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto';
-import { Tokens } from './types';
+import { AuthenticatedRequest, Tokens } from './types';
 import { AuthGuard } from '@nestjs/passport';
-import { Request } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -31,10 +30,10 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt'))
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  logout(@Req() req: Request) {
+  logout(@Req() req: AuthenticatedRequest) {
     const user = req.user;
     console.log('🚀 ~ AuthController ~ logout ~ user:', user);
-    return this.authService.logout(user['sub']);
+    return this.authService.logout(user.sub);
   }
 
   @UseGuards(AuthGuard('jwt-refresh'))
