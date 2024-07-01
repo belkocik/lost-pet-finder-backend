@@ -8,7 +8,7 @@ import { AuthDto } from './dto';
 import { DrizzleService } from 'src/drizzle/drizzle.service';
 import { users } from 'src/drizzle/schema';
 import * as bcrypt from 'bcrypt';
-import { eq } from 'drizzle-orm';
+import { and, eq, isNotNull } from 'drizzle-orm';
 import { Tokens } from './types';
 import { JwtService } from '@nestjs/jwt';
 import { I18nService } from 'nestjs-i18n';
@@ -62,7 +62,13 @@ export class AuthService {
 
     return tokens;
   }
-  logout() {}
+  async logout(userId: number) {
+    await this.drizzleService
+      .update(users)
+      .set({ hashedRefreshToken: null })
+      .where(and(eq(users.id, userId), isNotNull(users.hashedRefreshToken)));
+    // .where(eq(users.id, userId));
+  }
   refreshTokens() {}
 
   //? Utility functions
