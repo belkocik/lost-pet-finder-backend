@@ -1,2 +1,2 @@
 export * from './tokens.type';
-export * from './logout-request.type';
+export * from './authenticated-request.type';

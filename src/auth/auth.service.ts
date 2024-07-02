@@ -69,7 +69,24 @@ export class AuthService {
       .where(and(eq(users.id, userId), isNotNull(users.hashedRefreshToken)));
     // .where(eq(users.id, userId));
   }
-  refreshTokens() {}
+  async refreshTokens(userId: number, refreshToken: string) {
+    const user = await this.drizzleService.query.users.findFirst({
+      where: eq(users.id, userId),
+    });
+    if (!user) throw new ForbiddenException(this.i18n.t('auth.accessDenied'));
+
+    const refreshTokenMatches = await bcrypt.compare(
+      refreshToken,
+      user.hashedRefreshToken,
+    );
+    if (!refreshTokenMatches)
+      throw new ForbiddenException(this.i18n.t('auth.accessDenied'));
+
+    const tokens = await this.getTokens(user.id, user.email);
+    await this.updateRtHash(user.id, tokens.refreshToken);
+
+    return tokens;
+  }
 
   //? Utility functions
   hashData(data: string) {
