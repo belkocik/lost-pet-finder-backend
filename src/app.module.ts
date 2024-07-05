@@ -12,6 +12,8 @@ import {
   QueryResolver,
 } from 'nestjs-i18n';
 import * as path from 'path';
+import { AtGuard } from './common/guards';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -36,6 +38,12 @@ import * as path from 'path';
     }),
   ],
   controllers: [],
-  providers: [MyConfigService],
+  providers: [
+    MyConfigService,
+    {
+      provide: APP_GUARD,
+      useClass: AtGuard,
+    },
+  ],
 })
 export class AppModule {}
