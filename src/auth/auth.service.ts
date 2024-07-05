@@ -73,7 +73,8 @@ export class AuthService {
     const user = await this.drizzleService.query.users.findFirst({
       where: eq(users.id, userId),
     });
-    if (!user) throw new ForbiddenException(this.i18n.t('auth.accessDenied'));
+    if (!user || !user.hashedRefreshToken)
+      throw new ForbiddenException(this.i18n.t('auth.accessDenied'));
 
     const refreshTokenMatches = await bcrypt.compare(
       refreshToken,
