@@ -12,6 +12,7 @@ import { and, eq, isNotNull } from 'drizzle-orm';
 import { Tokens } from './types';
 import { JwtService } from '@nestjs/jwt';
 import { I18nService } from 'nestjs-i18n';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
@@ -19,6 +20,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly drizzleService: DrizzleService,
     private readonly i18n: I18nService,
+    private readonly configService: ConfigService,
   ) {}
 
   async signupLocal(dto: AuthDto): Promise<Tokens> {
@@ -102,7 +104,7 @@ export class AuthService {
           email,
         },
         {
-          secret: 'at-secret',
+          secret: this.configService.get('JWT_SECRET'),
           expiresIn: 60 * 15, // 15 minutes
         },
       ),
@@ -112,7 +114,7 @@ export class AuthService {
           email,
         },
         {
-          secret: 'rt-secret',
+          secret: this.configService.get('JWT_REFRESH_SECRET'),
           expiresIn: 60 * 60 * 24 * 7, // 7 days
         },
       ),
