@@ -9,11 +9,13 @@ import {
   AcceptLanguageResolver,
   HeaderResolver,
   I18nModule,
+  I18nService,
   QueryResolver,
 } from 'nestjs-i18n';
 import * as path from 'path';
 import { AtGuard } from './common/guards';
 import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -36,6 +38,25 @@ import { APP_GUARD } from '@nestjs/core';
         new HeaderResolver(['x-lang']),
       ],
     }),
+
+    ThrottlerModule.forRootAsync({
+      inject: [I18nService],
+      useFactory: (i18n: I18nService) => ({
+        throttlers: [
+          {
+            name: 'short',
+            ttl: 1000,
+            limit: 50,
+          },
+          {
+            name: 'long',
+            ttl: 60000,
+            limit: 1000,
+          },
+        ],
+        errorMessage: i18n.t('global.throttleErrorMessage'),
+      }),
+    }),
   ],
   controllers: [],
   providers: [
@@ -43,6 +64,10 @@ import { APP_GUARD } from '@nestjs/core';
     {
       provide: APP_GUARD,
       useClass: AtGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
     },
   ],
 })

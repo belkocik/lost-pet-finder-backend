@@ -12,6 +12,7 @@ import { AuthDto } from './dto';
 import { AuthenticatedRequest, AuthenticatedRequestRt, Tokens } from './types';
 import { Public } from 'src/common/decorators';
 import { RtGuard } from 'src/common/guards';
+import { Throttle } from '@nestjs/throttler';
 
 @Controller('auth')
 export class AuthController {
@@ -24,6 +25,7 @@ export class AuthController {
     return this.authService.signupLocal(dto);
   }
 
+  @Throttle({ short: { limit: 2, ttl: 1000 }, long: { limit: 5, ttl: 60000 } })
   @Public()
   @Post('local/signin')
   @HttpCode(HttpStatus.OK)
@@ -38,6 +40,10 @@ export class AuthController {
     return this.authService.logout(user.sub);
   }
 
+  @Throttle({
+    short: { limit: 1, ttl: 1000 },
+    long: { limit: 2, ttl: 60000 },
+  })
   @Public()
   @UseGuards(RtGuard)
   @Post('refresh')
