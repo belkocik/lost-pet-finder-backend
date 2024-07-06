@@ -21,6 +21,14 @@ class EnvironmentVariables {
   @IsNotEmpty()
   @IsString()
   DATABASE_URL: string;
+
+  @IsNotEmpty()
+  @IsString()
+  JWT_SECRET: string;
+
+  @IsNotEmpty()
+  @IsString()
+  JWT_REFRESH_SECRET: string;
 }
 
 export function validate(config: Record<string, unknown>) {
