@@ -73,7 +73,6 @@ export class AuthService {
       .update(user)
       .set({ hashedRefreshToken: null })
       .where(and(eq(user.id, userId), isNotNull(user.hashedRefreshToken)));
-    // .where(eq(users.id, userId));
   }
   async refreshTokens(userId: number, refreshToken: string) {
     const userInDb = await this.drizzleService.query.user.findFirst({
