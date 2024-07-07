@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { AuthDto } from './dto';
 import { DrizzleService } from 'src/drizzle/drizzle.service';
-import { users } from 'src/drizzle/schema';
+import { user } from 'src/drizzle/schema';
 import * as bcrypt from 'bcrypt';
 import { and, eq, isNotNull } from 'drizzle-orm';
 import { Tokens } from './types';
@@ -27,7 +27,7 @@ export class AuthService {
     try {
       const hashedPassword = await this.hashData(dto.password);
       const [newUser] = await this.drizzleService
-        .insert(users)
+        .insert(user)
         .values({
           email: dto.email,
           password: hashedPassword,
@@ -50,43 +50,47 @@ export class AuthService {
   }
 
   async signinLocal(dto: AuthDto): Promise<Tokens> {
-    const user = await this.drizzleService.query.users.findFirst({
-      where: eq(users.email, dto.email),
+    const userInDb = await this.drizzleService.query.user.findFirst({
+      where: eq(user.email, dto.email),
     });
-    if (!user) throw new ForbiddenException(this.i18n.t('auth.accessDenied'));
+    if (!userInDb)
+      throw new ForbiddenException(this.i18n.t('auth.accessDenied'));
 
-    const passwordMatches = await bcrypt.compare(dto.password, user.password);
+    const passwordMatches = await bcrypt.compare(
+      dto.password,
+      userInDb.password,
+    );
     if (!passwordMatches)
       throw new ForbiddenException(this.i18n.t('auth.accessDenied'));
 
-    const tokens = await this.getTokens(user.id, user.email);
-    await this.updateRtHash(user.id, tokens.refreshToken);
+    const tokens = await this.getTokens(userInDb.id, userInDb.email);
+    await this.updateRtHash(userInDb.id, tokens.refreshToken);
 
     return tokens;
   }
   async logout(userId: number) {
     await this.drizzleService
-      .update(users)
+      .update(user)
       .set({ hashedRefreshToken: null })
-      .where(and(eq(users.id, userId), isNotNull(users.hashedRefreshToken)));
+      .where(and(eq(user.id, userId), isNotNull(user.hashedRefreshToken)));
     // .where(eq(users.id, userId));
   }
   async refreshTokens(userId: number, refreshToken: string) {
-    const user = await this.drizzleService.query.users.findFirst({
-      where: eq(users.id, userId),
+    const userInDb = await this.drizzleService.query.user.findFirst({
+      where: eq(user.id, userId),
     });
-    if (!user || !user.hashedRefreshToken)
+    if (!userInDb || !userInDb.hashedRefreshToken)
       throw new ForbiddenException(this.i18n.t('auth.accessDenied'));
 
     const refreshTokenMatches = await bcrypt.compare(
       refreshToken,
-      user.hashedRefreshToken,
+      userInDb.hashedRefreshToken,
     );
     if (!refreshTokenMatches)
       throw new ForbiddenException(this.i18n.t('auth.accessDenied'));
 
-    const tokens = await this.getTokens(user.id, user.email);
-    await this.updateRtHash(user.id, tokens.refreshToken);
+    const tokens = await this.getTokens(userInDb.id, userInDb.email);
+    await this.updateRtHash(userInDb.id, tokens.refreshToken);
 
     return tokens;
   }
@@ -129,8 +133,8 @@ export class AuthService {
   async updateRtHash(userId: number, rt: string) {
     const hash = await this.hashData(rt);
     await this.drizzleService
-      .update(users)
+      .update(user)
       .set({ hashedRefreshToken: hash })
-      .where(eq(users.id, userId));
+      .where(eq(user.id, userId));
   }
 }
