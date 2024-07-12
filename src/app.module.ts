@@ -21,6 +21,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
     DrizzleModule,
     ConfigModule.forRoot({
       isGlobal: true,
+      cache: true,
       validate: validate,
     }),
     AuthModule,

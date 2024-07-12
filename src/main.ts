@@ -15,7 +15,14 @@ async function bootstrap() {
     new FastifyAdapter({ logger: envToLogger[process.env.NODE_ENV] ?? true }),
   );
 
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      forbidNonWhitelisted: true,
+      whitelist: true,
+    }),
+  );
+
   app.setGlobalPrefix('api');
 
   const configService = app.get(ConfigService);
