@@ -10,7 +10,6 @@ import helmet from '@fastify/helmet';
 import { envToLogger } from './utils';
 
 async function bootstrap() {
-  // const app = await NestFactory.create(AppModule); // express
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter({
