@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { DrizzleModule } from './drizzle/drizzle.module';
+import { DrizzleModule } from './modules/drizzle/drizzle.module';
 import { ConfigModule } from '@nestjs/config';
 import { validate } from './config';
-import { AuthModule } from './auth/auth.module';
-import { UsersModule } from './users/users.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { UsersModule } from './modules/users/users.module';
 import {
   AcceptLanguageResolver,
   HeaderResolver,

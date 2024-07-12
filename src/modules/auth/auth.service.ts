@@ -5,8 +5,8 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { AuthDto } from './dto';
-import { DrizzleService } from 'src/drizzle/drizzle.service';
-import { user } from 'src/drizzle/schema';
+import { DrizzleService } from 'src/modules/drizzle/drizzle.service';
+import { user } from 'src/modules/drizzle/schema';
 import * as bcrypt from 'bcrypt';
 import { and, eq, isNotNull } from 'drizzle-orm';
 import { Tokens } from './types';
