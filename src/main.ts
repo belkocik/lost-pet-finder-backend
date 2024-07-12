@@ -6,14 +6,20 @@ import {
   FastifyAdapter,
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
+import helmet from '@fastify/helmet';
 import { envToLogger } from './utils';
 
 async function bootstrap() {
   // const app = await NestFactory.create(AppModule); // express
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
-    new FastifyAdapter({ logger: envToLogger[process.env.NODE_ENV] ?? true }),
+    new FastifyAdapter({
+      logger: envToLogger[process.env.NODE_ENV] ?? true,
+    }),
   );
+
+  app.enableCors({ origin: true });
+  await app.register(helmet);
 
   app.useGlobalPipes(
     new ValidationPipe({
