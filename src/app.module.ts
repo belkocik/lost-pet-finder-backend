@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { DrizzleModule } from './drizzle/drizzle.module';
-import { MyConfigService } from './config/config.service';
 import { ConfigModule } from '@nestjs/config';
 import { validate } from './config';
 import { AuthModule } from './auth/auth.module';
@@ -60,7 +59,6 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
   ],
   controllers: [],
   providers: [
-    MyConfigService,
     {
       provide: APP_GUARD,
       useClass: AtGuard,
