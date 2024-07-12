@@ -3,7 +3,7 @@ import { DrizzleModule } from './modules/drizzle/drizzle.module';
 import { ConfigModule } from '@nestjs/config';
 import { validate } from './config';
 import { AuthModule } from './modules/auth/auth.module';
-import { UsersModule } from './modules/users/users.module';
+import { UserModule } from './modules/user/user.module';
 import {
   AcceptLanguageResolver,
   HeaderResolver,
@@ -24,7 +24,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
       validate: validate,
     }),
     AuthModule,
-    UsersModule,
+    UserModule,
     I18nModule.forRoot({
       fallbackLanguage: 'en',
       loaderOptions: {
