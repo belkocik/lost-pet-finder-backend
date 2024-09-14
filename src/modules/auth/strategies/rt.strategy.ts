@@ -1,7 +1,7 @@
+import type { FastifyRequest } from 'fastify';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
-import { FastifyRequest } from 'fastify';
 import { JwtPayload } from '../types';
 import { ConfigService } from '@nestjs/config';
 
